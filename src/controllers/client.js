@@ -64,11 +64,16 @@ router.post("/", authenticateToken, userRole("Employee"), async(req, res) => {
                             */
 router.put("/:clientId", authenticateToken, userRole("Employee"), async(req, res) => {
   try {
-    const updateClient = await Client.findOneAndUpdate(
-      {_id : req.params.clientId},
-      req.body, {new : true}
-    )
-    res.json("Updated successfully!");
+    const findClient = await Client.findOne({businessName : req. body.businessName});
+    if (findClient) {
+      res.json({"status" : "Business Name already exists!"});
+    } else {
+      const updateClient = await Client.findOneAndUpdate(
+        {_id : req.params.clientId},
+        req.body, {new : true}
+      )
+      res.json("Updated successfully!");
+    }
   } catch (e) {
     res.json(e.message);
   }

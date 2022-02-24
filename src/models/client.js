@@ -116,7 +116,8 @@ const clientSchema = new mongoose.Schema({
   },
   businessName : {
     type : String,
-    required : true
+    required : true,
+    unique: true
   },
   entityType : {
     type : String,

@@ -2,6 +2,8 @@
 const { secretToken } = require("../../constant.js");
 const Client = require('../models/client');
 const jwt = require("jsonwebtoken");
+const path = require('path');
+const multer = require('multer');
 
 /**
  * authenticateToken - This function will authorize the token.
@@ -48,7 +50,7 @@ function userRole(role) {
  * @return {function} a Middleware function.
  */
 function isSameUser(req, res, next) {
-  if (req.params.userId === req.user._id) {
+  if (req.params.userId === req.user._id || req.user.role === 'Admin') {
     next();
   } else {
     return res.send({"status" : "You are not allowed."})
@@ -72,9 +74,35 @@ function giveUniqueId(findClient) {
   }
 }
 
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function(req, file, cb) {
+    let ext = path.extname(file.originalname)
+    cb(null, Date.now() + ext)
+  }
+})
+
+var upload = multer({
+  storage: storage,
+  fileFilter: function(req, file, callback) {
+    if (
+      file.mimetype == "image/png" ||
+      file.mimetype ==  "image/jpg"
+    ){
+      callback(null,true);
+    } else {
+      console.log("Only jpg and png file supported!");
+      callback(null, false);
+    }
+  },
+  limits: {
+    fileSize: 1024 * 1024 * 2
+  }
+})
 
 
 
 
-
-module.exports = { authenticateToken, userRole, isSameUser, giveUniqueId };
+module.exports = { authenticateToken, userRole, isSameUser, giveUniqueId, upload };
