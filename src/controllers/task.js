@@ -41,10 +41,10 @@ router.get("/:taskId", authenticateToken, userRole("Employee"), async(req, res) 
                  /**
                   * This route will create a new task.
                   */
-router.post("/", authenticateToken, userRole("Admin"), async(req, res) => {
+router.post("/", authenticateToken, userRole("Admin"), upload.single('uploadFile'), async(req, res) => {
   try {
+    console.log(req.file);
     const foundTask = await Task.findOne({taskName : req.body.taskName});
-    console.log(req. body);
     if (foundTask) {
       res.json({"status" : "Task name already exists."});
     } else {
@@ -52,7 +52,7 @@ router.post("/", authenticateToken, userRole("Admin"), async(req, res) => {
       if (req.file) {
         createTask.uploadFile = req.file.path;
       }
-      upload.single('uploadFile');
+
       const newTask = await createTask.save();
       res.json(newTask);
     }

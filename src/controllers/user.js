@@ -2,14 +2,14 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
-const { authenticateToken, userRole, isSameUser } = require("../config/util");
+const { authenticateToken, userRole, giveUniqueId, isSameUser } = require("../config/util");
 
                 /**
                  * This route will give information of all the users.
                  */
 router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
   try{
-    const foundUsers = await User.find({}, ['_id', 'username', 'name', 'role']);
+    const foundUsers = await User.find({}, ['_id', 'username', 'name', 'role', 'uniqueId']);
     if (!foundUsers) {
       res.json({ "status" : "User not found!" });
     } else {
@@ -41,7 +41,7 @@ router.get("/:userId", authenticateToken, userRole("Employee"), async(req, res) 
                 /**
                  * This route will create new users(employee).
                  */
-router.post("/", authenticateToken, userRole("Admin"), async(req, res) => {
+router.post("/",authenticateToken, userRole("Admin"),  async(req, res) => {
   try {
     const { name, username, password } = req.body
 
@@ -49,14 +49,17 @@ router.post("/", authenticateToken, userRole("Admin"), async(req, res) => {
       res.json({ "status" : "Please fill all the required fields." })
     }
     else {
-
       const foundUser = await User.findOne({username : req.body.username})
       if (foundUser) {
         res.json({"status" : "Username already exists."})
+      } else {
+        const findUser = await User.find({});
+        const uniqueId = giveUniqueId(findUser);
+        const createUser = new User(req.body)
+        createUser.uniqueId = uniqueId;
+        const newUser = await createUser.save()
+        res.json(newUser);
       }
-      const createUser = new User(req.body)
-      const newUser = await createUser.save()
-      res.json(newUser);
     }
   }
    catch (e) {

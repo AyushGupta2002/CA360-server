@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
     type : String,
     enum : enums.role,
     default : 'Employee'
+  },
+  uniqueId : {
+    type: Number
   }
 });
 

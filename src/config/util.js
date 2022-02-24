@@ -66,7 +66,7 @@ function isSameUser(req, res, next) {
  * @return {Number} unique id for clients.=
  */
 function giveUniqueId(findClient) {
-  if (!findClient) {
+  if (findClient.length === 0) {
     return 1;
   } else {
     const uniqueId = findClient[findClient.length-1].uniqueId + 1;
@@ -76,11 +76,11 @@ function giveUniqueId(findClient) {
 
 var storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, 'uploads/')
+    cb(null, 'public/uploads/')
   },
   filename: function(req, file, cb) {
     let ext = path.extname(file.originalname)
-    cb(null, Date.now() + ext)
+    cb(null, file.originalname)
   }
 })
 
@@ -89,11 +89,12 @@ var upload = multer({
   fileFilter: function(req, file, callback) {
     if (
       file.mimetype == "image/png" ||
-      file.mimetype ==  "image/jpg"
+      file.mimetype == "image/jpg" ||
+      file.mimetype == "document/pdf"
     ){
       callback(null,true);
     } else {
-      console.log("Only jpg and png file supported!");
+      console.log("Only jpg, png and pdf file supported!");
       callback(null, false);
     }
   },
