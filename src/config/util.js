@@ -66,7 +66,7 @@ function isSameUser(req, res, next) {
  * @return {Number} unique id for clients.=
  */
 function giveUniqueId(findClient) {
-  if (findClient.length === 0) {
+  if (findClient.length == 0) {
     return 1;
   } else {
     const uniqueId = findClient[findClient.length-1].uniqueId + 1;
