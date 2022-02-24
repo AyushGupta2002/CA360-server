@@ -19,7 +19,7 @@ router.post("/login", async(req, res) => {
             role : findUser.role
           };
            const accessToken = jwt.sign(user, secretToken);
-           res.json({accessToken: accessToken, name : findUser.name, role : findUser.role});
+           res.json({accessToken: accessToken, name : findUser.name, role : findUser.role, username : findUser.username});
 
          } else {
            res.json({"status" : "Incorrect password!"})
