@@ -21,6 +21,22 @@ router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
 });
 
 
+                                                                /**
+                                                                 * This route will give the deatils of particular role.
+                                                                 */
+router.get("/:roleId", authenticateToken, userRole("Employee"), async(req, res) => {
+  try {
+    const foundRole = await Role.findOne({_id : req.params.roleId});
+    if (!foundRole) {
+      res.json({"status" : "Role not found!"});
+    } else {
+      res.json(foundRole);
+    }
+  } catch (e) {
+    res.json(e.message);
+  }
+})
+
                                                        /**
                                                         * This route will add new role.
                                                         */
