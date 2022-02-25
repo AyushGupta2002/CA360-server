@@ -74,35 +74,30 @@ function giveUniqueId(findClient) {
   }
 }
 
-var storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, 'public/uploads/')
-  },
-  filename: function(req, file, cb) {
-    let ext = path.extname(file.originalname)
-    cb(null, file.originalname)
-  }
-})
 
+const fileStorageEngine = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './public/uploads')
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '--' + file.originalname)
+  },
+})
 var upload = multer({
-  storage: storage,
+  storage: fileStorageEngine,
   fileFilter: function(req, file, callback) {
-    if (
-      file.mimetype == "image/png" ||
-      file.mimetype == "image/jpg" ||
-      file.mimetype == "document/pdf"
-    ){
+    const ext = path.extname(file.originalname)
+    const allowed = ['.png', '.jpg', '.jpeg', '.pdf'];
+    if (allowed.includes(ext)){
       callback(null,true);
     } else {
-      console.log("Only jpg, png and pdf file supported!");
-      callback(null, false);
+      return callback("Only jpg, png and pdf file supported!");
     }
   },
   limits: {
     fileSize: 1024 * 1024 * 2
   }
 })
-
 
 
 

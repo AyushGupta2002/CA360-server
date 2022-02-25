@@ -41,18 +41,16 @@ router.get("/:taskId", authenticateToken, userRole("Employee"), async(req, res) 
                  /**
                   * This route will create a new task.
                   */
-router.post("/", authenticateToken, userRole("Admin"), upload.single('uploadFile'), async(req, res) => {
+router.post("/", authenticateToken, userRole("Admin"), upload.array("uploadFile"), async(req, res) => {
   try {
-    console.log(req.file);
     const foundTask = await Task.findOne({taskName : req.body.taskName});
     if (foundTask) {
       res.json({"status" : "Task name already exists."});
     } else {
       const createTask = new Task(req.body);
-      if (req.file) {
-        createTask.uploadFile = req.file.path;
-      }
-
+      req.files.forEach((file) => {
+        createTask.uploadFile.push(file.path);
+      });
       const newTask = await createTask.save();
       res.json(newTask);
     }
@@ -67,17 +65,12 @@ router.post("/", authenticateToken, userRole("Admin"), upload.single('uploadFile
                           */
 router.put("/:taskId", authenticateToken, userRole("Employee"), async(req, res) => {
   try {
-    const findTask = await Task.findOne({taskName : req.body.taskName});
-    if (findTask) {
-      res.json({"status" : "Task name already exists."});
-    } else {
-      const updateTask = await Task.findOneAndUpdate(
-        {_id : req.params.taskId},
-        req.body,
-        {new : true}
-      );
-      res.json("Task updated successfully.")
-    }
+    const updateTask = await Task.findOneAndUpdate(
+      {_id : req.params.taskId},
+      req.body,
+      {new : true}
+    );
+    res.json("Task updated successfully.")
   } catch (e) {
     res.json(e.message);
   }
