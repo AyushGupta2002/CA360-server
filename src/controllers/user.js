@@ -72,13 +72,8 @@ router.post("/",authenticateToken, userRole("Admin"),  async(req, res) => {
                           */
 router.put("/:userId", authenticateToken, isSameUser, async(req, res) => {
     try{
-      const foundUser = await User.findOne({username : req.body.username})
-      if (foundUser) {
-        res.json({"status" : "Username already exists."})
-      } else {
         const updateUser = await User.findOneAndUpdate({_id: req.params.userId}, req.body,{new:true})
         res.json("Updated successfully!")
-      }
     } catch (e) {
       res.json(e.message);
     }

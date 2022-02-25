@@ -20,7 +20,7 @@ const taskSchema = new mongoose.Schema({
     default : "open"
   },
   uploadFile : {
-    type : [String]
+    type : []
   }
 });
 

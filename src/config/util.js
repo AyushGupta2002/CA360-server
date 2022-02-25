@@ -4,7 +4,7 @@ const Client = require('../models/client');
 const jwt = require("jsonwebtoken");
 const path = require('path');
 const multer = require('multer');
-
+const fs = require('fs');
 /**
  * authenticateToken - This function will authorize the token.
  *
@@ -77,7 +77,7 @@ function giveUniqueId(findClient) {
 
 const fileStorageEngine = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './public/uploads')
+    cb(null, 'public/uploads/')
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '--' + file.originalname)
@@ -87,7 +87,7 @@ var upload = multer({
   storage: fileStorageEngine,
   fileFilter: function(req, file, callback) {
     const ext = path.extname(file.originalname)
-    const allowed = ['.png', '.jpg', '.jpeg', '.pdf'];
+    const allowed = ['.png', '.jpg', '.jpeg', '.pdf', '.PNG', '.JPEG', '.JPG'];
     if (allowed.includes(ext)){
       callback(null,true);
     } else {

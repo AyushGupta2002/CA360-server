@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
 const { authenticateToken, userRole, upload } = require("../config/util");
-
+const fs = require('fs');
                 /**
                  * This route will give all the tasks.
                  */
@@ -49,7 +49,7 @@ router.post("/", authenticateToken, userRole("Admin"), upload.array("uploadFile"
     } else {
       const createTask = new Task(req.body);
       req.files.forEach((file) => {
-        createTask.uploadFile.push(file.path);
+        createTask.uploadFile.push(`${file.path}`);
       });
       const newTask = await createTask.save();
       res.json(newTask);
@@ -82,8 +82,21 @@ router.put("/:taskId", authenticateToken, userRole("Employee"), async(req, res) 
                            */
 router.delete("/:taskId", authenticateToken, userRole("Admin"), async(req, res) => {
   try {
+    const findTask = await Task.findOne({_id : req.params.taskId});
     const removeTask = await Task.deleteMany({_id : req.params.taskId});
-    res.json("Task removed successfully.")
+    if (!findTask) {
+      res.json({"status" : "Task not found!"});
+    } else {
+      findTask.uploadFile.forEach((file) => {
+        fs.unlink(file, (e) => {
+          if (e) {
+            res.json(e.message);
+            return;
+          }
+        });
+      });
+      res.json("Task removed successfully.")
+    }
   } catch (e) {
     res.json(e.message);
   }
