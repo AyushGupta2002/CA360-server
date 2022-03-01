@@ -2,68 +2,62 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
-const { authenticateToken, userRole, giveUniqueId, isSameUser } = require("../config/util");
+const Approval = require("../models/approval");
+const { authenticateToken, giveUniqueId, isSameUser, responseFormatter, isEmployeeAuth, isAdminAuth } = require("../config/util");
 
                 /**
                  * This route will give information of all the users.
                  */
-router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
+router.get("/", authenticateToken, isEmployeeAuth, async(req, res) => {
   try{
-    const foundUsers = await User.find({}, ['_id', 'username', 'name', 'role', 'uniqueId']);
-    if (!foundUsers) {
-      res.json({ "status" : "User not found!" });
-    } else {
-      res.json(foundUsers);
-    }
+    const usersData = await User.find({}, ['_id', 'username', 'name', 'role', 'uniqueId']);
+    responseFormatter(res, null, {data : usersData});
   }
   catch(e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 
                       /**
                        * This route will give the information of a particular user.
                        */
-router.get("/:userId", authenticateToken, userRole("Employee"), async(req, res) => {
+router.get("/:userId", authenticateToken, isEmployeeAuth, async(req, res) => {
   try {
-    const foundUser = await User.findOne({_id : req.params.userId},['_id','name','username','role']);
-
-    if (!foundUser) {
-      res.json({ "status" : "User not found!" });
-    } else {
-      res.json(foundUser);
-    }
+    const userData = await User.findOne({_id : req.params.userId},['_id','name','username','role']);
+    responseFormatter(res, null, {data : userData});
   } catch(e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 })
 
                 /**
                  * This route will create new users(employee).
                  */
-router.post("/",authenticateToken, userRole("Admin"),  async(req, res) => {
+router.post("/",authenticateToken, isAdminAuth, async(req, res) => {
   try {
     const { name, username, password } = req.body
 
     if ( !name || !password || !username) {
-      res.json({ "status" : "Please fill all the required fields." })
+      responseFormatter(res, {message : "Please fill all the required fields!"}, null);
     }
     else {
-      const foundUser = await User.findOne({username : req.body.username})
-      if (foundUser) {
-        res.json({"status" : "Username already exists."})
+      const userData = await User.findOne({username : req.body.username})
+      if (userData) {
+        responseFormatter(res, {message : "User name already exists!"}, null);
       } else {
-        const findUser = await User.find({});
-        const uniqueId = giveUniqueId(findUser);
-        const createUser = new User(req.body)
-        createUser.uniqueId = uniqueId;
-        const newUser = await createUser.save()
-        res.json(newUser);
+        const userData = await User.find({});
+        const uniqueId = giveUniqueId(userData);
+        const createUser = new User(req.body);
+        if (createUser){
+          createUser.uniqueId = uniqueId;
+          const newUser = await createUser.save()
+          responseFormatter(res, null, {data : newUser});
+        }
       }
     }
   }
    catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 })
 
@@ -72,22 +66,27 @@ router.post("/",authenticateToken, userRole("Admin"),  async(req, res) => {
                           */
 router.put("/:userId", authenticateToken, isSameUser, async(req, res) => {
     try{
-        const updateUser = await User.findOneAndUpdate({_id: req.params.userId}, req.body,{new:true})
-        res.json("Updated successfully!")
+        const newApprovalRequest = new Approval({
+          approvalRequest : "updateUser",
+          requestingUser : req.user._id,
+          data : req.body
+        });
+        const createApprovalRequest = await newApprovalRequest.save();
+        responseFormatter(res, null, {message : "User get updated once Admin will approve."});
     } catch (e) {
-      res.json(e.message);
+      responseFormatter(res, {message : e.message}, null);
     }
 })
 
                           /**
                            * This route will delete the user.
                            */
-router.delete("/:userId", authenticateToken, userRole("Admin"), async(req, res) => {
+router.delete("/:userId", authenticateToken, isAdminAuth, async(req, res) => {
   try {
-    const deleteUser = await User.deleteMany({_id : req.params.userId})
-    res.json("User successfully removed!")
+    const deletedUser = await User.deleteMany({_id : req.params.userId})
+    responseFormatter(res, null, {message : "User removed successfully."});
   } catch(e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 })
 

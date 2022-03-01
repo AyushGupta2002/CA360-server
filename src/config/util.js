@@ -1,5 +1,5 @@
 
-const { secretToken } = require("../../constant.js");
+const { secretToken } = require("./constant.js");
 const Client = require('../models/client');
 const jwt = require("jsonwebtoken");
 const path = require('path');
@@ -24,22 +24,33 @@ function authenticateToken(req, res, next) {
 }
 
 /**
- * userRole - This function checks the role of the user.
- *
- * @param {String} role This is the required role.
+ * isEmployeeAuth - This function checks whether the user is employee or admin.
  *
  * @return {function} Middleware
  */
-function userRole(role) {
-  return (req, res, next) => {
-    if (req.user.role === role || req.user.role === 'Admin') {
-      next();
-    }
-    else {
-      return res.send({"status" : `${req.user.role}'s are not allowed.`});
-    }
+function isEmployeeAuth(req, res, next) {
+  if (req.user.role === 'Employee' || req.user.role === 'Admin') {
+    next();
+  }
+  else {
+    return responseFormatter(res, {message : `${req.user.role}s are not allowed.`}, null);
   }
 }
+
+
+/**
+ * isAdminAuth - This function checks whether the user is admin or not.
+ *
+ * @return {function} Middleware
+ */
+ function isAdminAuth(req, res, next) {
+   if (req.user.role === 'Admin') {
+     next();
+   }
+   else {
+     return responseFormatter(res, {message : `${req.user.role}s are not allowed.`}, null);
+   }
+ }
 
 
 /**
@@ -97,8 +108,34 @@ var upload = multer({
   limits: {
     fileSize: 1024 * 1024 * 2
   }
-})
+});
 
 
+/**
+ * responseFormatter - Function for handling api responses.
+ *
+ * @param {object} res   Response given by api.
+ * @param {Obejct} error  Error message.
+ * @param {Object} data  Data send as a response.
+ *
+ */
+const responseFormatter = (res, error, data) => {
+  if (error) {
+    res.status(400);
+    res.send(error);
+  } else {
+    Promise.resolve(data).then((value) => {
+      if (!value) {
+        res.status(204);
+        res.send({ data: null });
+      } else {
+        const response = data;
+        res.status(200);
+        res.send(response);
+      }
+    });
+  }
+};
 
-module.exports = { authenticateToken, userRole, isSameUser, giveUniqueId, upload };
+
+module.exports = { authenticateToken, isSameUser, giveUniqueId, upload, responseFormatter, isAdminAuth, isEmployeeAuth };

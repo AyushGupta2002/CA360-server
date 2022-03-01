@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { enums } = require('../../constant.js');
+const { enums } = require('../config/constant.js');
 
 const contactsSchema = new mongoose.Schema({
   primaryMobile : {

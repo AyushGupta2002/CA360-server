@@ -2,21 +2,17 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
-const { authenticateToken, userRole, upload } = require("../config/util");
+const { authenticateToken, upload, responseFormatter, isEmployeeAuth, isAdminAuth } = require("../config/util");
 const fs = require('fs');
                 /**
                  * This route will give all the tasks.
                  */
-router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
+router.get("/", authenticateToken, isEmployeeAuth, async(req, res) => {
   try {
-    const foundTasks = await Task.find();
-    if (!foundTasks) {
-      res.json({"status" : "Tasks not found!"});
-    } else {
-      res.json(foundTasks);
-    }
+    const tasksData = await Task.find();
+    responseFormatter(res, null, {data : tasksData});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 
@@ -24,16 +20,12 @@ router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
                        /**
                         * This route will give a single task details.
                         */
-router.get("/:taskId", authenticateToken, userRole("Employee"), async(req, res) => {
+router.get("/:taskId", authenticateToken, isEmployeeAuth, async(req, res) => {
   try {
-    const foundTask = await Task.findOne({_id : req.params.taskId});
-    if (!foundTask) {
-      res.json({"status" : "Task not found!"});
-    } else {
-      res.json(foundTask);
-    }
+    const taskData = await Task.findOne({_id : req.params.taskId});
+    responseFormatter(res, null, {data : taskData});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 })
 
@@ -41,21 +33,21 @@ router.get("/:taskId", authenticateToken, userRole("Employee"), async(req, res) 
                  /**
                   * This route will create a new task.
                   */
-router.post("/", authenticateToken, userRole("Admin"), upload.array("uploadFile"), async(req, res) => {
+router.post("/", authenticateToken, isEmployeeAuth, upload.array("uploadFile"), async(req, res) => {
   try {
-    const foundTask = await Task.findOne({taskName : req.body.taskName});
-    if (foundTask) {
-      res.json({"status" : "Task name already exists."});
+    const taskData = await Task.findOne({taskName : req.body.taskName});
+    if (taskData) {
+      responseFormatter(res, {message : "Task name already exists!"}, null);
     } else {
       const createTask = new Task(req.body);
       req.files.forEach((file) => {
         createTask.uploadFile.push(`${file.path}`);
       });
       const newTask = await createTask.save();
-      res.json(newTask);
+      responseFormatter(res, null, {data : newTask});
     }
   } catch (e) {
-     res.json(e.message);
+     responseFormatter(res, {message : e.message}, null);
   }
 });
 
@@ -63,16 +55,16 @@ router.post("/", authenticateToken, userRole("Admin"), upload.array("uploadFile"
                          /**
                           * This route will update the task.
                           */
-router.put("/:taskId", authenticateToken, userRole("Employee"), async(req, res) => {
+router.put("/:taskId", authenticateToken, isEmployeeAuth, async(req, res) => {
   try {
-    const updateTask = await Task.findOneAndUpdate(
+    const updatedClientTask = await Task.findOneAndUpdate(
       {_id : req.params.taskId},
       req.body,
       {new : true}
     );
-    res.json("Task updated successfully.")
+    responseFormatter(res, null, {data : updatedTask});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 
@@ -80,25 +72,20 @@ router.put("/:taskId", authenticateToken, userRole("Employee"), async(req, res) 
                           /**
                            * This route will delete a task.
                            */
-router.delete("/:taskId", authenticateToken, userRole("Admin"), async(req, res) => {
+router.delete("/:taskId", authenticateToken, isAdminAuth, async(req, res) => {
   try {
-    const findTask = await Task.findOne({_id : req.params.taskId});
+    const taskData = await Task.findOne({_id : req.params.taskId});
     const removeTask = await Task.deleteMany({_id : req.params.taskId});
-    if (!findTask) {
-      res.json({"status" : "Task not found!"});
-    } else {
-      findTask.uploadFile.forEach((file) => {
+      taskData.uploadFile.forEach((file) => {
         fs.unlink(file, (e) => {
           if (e) {
-            res.json(e.message);
-            return;
+            responseFormatter(res, {message : e.message}, null);
           }
         });
       });
-      res.json("Task removed successfully.")
-    }
+      responseFormatter(res, null, {message : "Task removed successfully."});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 })
 

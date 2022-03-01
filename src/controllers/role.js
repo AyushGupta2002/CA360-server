@@ -2,21 +2,17 @@
 const express = require('express');
 const router = express.Router();
 const Role = require('../models/role');
-const { authenticateToken, userRole } = require("../config/util");
+const { authenticateToken, responseFormatter, isAdminAuth } = require("../config/util");
 
                                                          /**
                                                           * This route will give all roles.
                                                           */
-router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
+router.get("/", authenticateToken, isAdminAuth, async(req, res) => {
   try {
-    const foundRoles = await Role.find();
-    if (!foundRoles) {
-      res.json({"status" : "Roles not found!"});
-    } else {
-      res.json(foundRoles);
-    }
+    const rolesData = await Role.find();
+    responseFormatter(res, null, {data : rolesData});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 
@@ -24,46 +20,42 @@ router.get("/", authenticateToken, userRole("Employee"), async(req, res) => {
                                                                 /**
                                                                  * This route will give the deatils of particular role.
                                                                  */
-router.get("/:roleId", authenticateToken, userRole("Employee"), async(req, res) => {
+router.get("/:roleId", authenticateToken, isAdminAuth, async(req, res) => {
   try {
-    const foundRole = await Role.findOne({_id : req.params.roleId});
-    if (!foundRole) {
-      res.json({"status" : "Role not found!"});
-    } else {
-      res.json(foundRole);
-    }
+    const roleData = await Role.findOne({_id : req.params.roleId});
+    responseFormatter(res, null, {data : roleData});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 })
 
                                                        /**
                                                         * This route will add new role.
                                                         */
-router.post("/", authenticateToken, userRole("Admin"), async(req, res) => {
+router.post("/", authenticateToken, isAdminAuth, async(req, res) => {
   try {
-    const foundRole = await Role.findOne({role : req.body.role});
-    if (foundRole) {
-      res.json({"status" : "Role is already present."})
+    const roleData = await Role.findOne({role : req.body.role});
+    if (roleData) {
+      responseFormatter(res, {message : "Role already exists!"}, null);
     } else{
       const createRole = new Role(req.body);
       const newRole = await createRole.save();
-      res.json(newRole);
+      responseFormatter(res, null, {data : newRole});
     }
   } catch (e) {
-    res.jon(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 
                                                             /**
                                                             * This route will delete a role.
                                                             */
-router.delete("/:roleId", authenticateToken, userRole("Admin"), async(req, res) => {
+router.delete("/:roleId", authenticateToken, isAdminAuth, async(req, res) => {
   try {
     const removeRole = await Role.deleteMany({_id : req.params.roleId});
-    res.json("Role removed successfully.")
+    responseFormatter(res, null, {message : "Role removed successfully."});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 

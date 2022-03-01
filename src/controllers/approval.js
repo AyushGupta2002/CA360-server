@@ -1,0 +1,117 @@
+
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const Approval = require('../models/approval');
+const Client = require('../models/client');
+const User = require('../models/user');
+const { authenticateToken, isAdminAuth, responseFormatter, giveUniqueId} = require('../config/util');
+
+
+                                                /**
+                                                 * This route will give the list of all approval requests.
+                                                 *
+                                                 */
+router.get("/", authenticateToken, isAdminAuth, async(req, res) => {
+  try {
+    const apporvalData = await Approval.find();
+    responseFormatter(res, null, {data : apporvalData});
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+});
+
+
+                                                           /**
+                                                            * This route will give the data of a particular request.
+                                                            */
+router.get("/:approvalId", authenticateToken, isAdminAuth, async(req, res) => {
+  try {
+    const apporvalData = await Approval.findOne({_id : req.params.approvalId});
+    responseFormatter(res, null, {data : apporvalData});
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+});
+
+
+                                                                   /**
+                                                                    * This route will create a client once approved by Admin.
+                                                                    */
+router.post("/create/:approvalId", authenticateToken, isAdminAuth, async(req, res) => {
+  try {
+    const approvalData = await Approval.findOne({_id : req.params.approvalId});
+    const clientData = await Client.find({});
+    const uniqueId = giveUniqueId(clientData);
+    const createClient = new Client(approvalData.data);
+    createClient.uniqueId = uniqueId;
+    const newClient = await createClient.save();
+    const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
+    responseFormatter(res, null, {message : "Client created successfully."});
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+});
+
+
+                                                                   /**
+                                                                    * this route will update the client's or user's data once approved by Admin.
+                                                                    */
+router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, res) => {
+  try {
+    const approvalData = await Approval.findOne({_id : req.params.approvalId});
+    if (approvalData.approvalRequest === "updateClient") {
+      const updatedClient = await Client.findOneAndUpdate(
+        {_id : approvalData.data._id},
+        approvalData.data, {new : true}
+      )
+      const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
+      responseFormatter(res, null, {message : "Client updated Successfully."});
+    }
+    else {
+      const updatedUser = await User.findOneAndUpdate(
+        {_id : approvalData.updatingUser},
+        approvalData.data, {new : true}
+      )
+      const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
+      responseFormatter(res, null, {message : "User updated Successfully."});
+    }
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+});
+
+
+                                                                      /**
+                                                                       * this route will delete a client once approved by Admin.
+                                                                       */
+router.delete("/delete/:approvalId",  authenticateToken, isAdminAuth, async(req, res) => {
+  try {
+    const approvalData = await Approval.findOne({_id : req.params.approvalId});
+    if (approvalData.approvalRequest === "deleteClient") {
+      const deletedClient = await Client.deleteMany({_id : approvalData.requestingForClient});
+      const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
+      responseFormatter(res, null, {message : "Client deleted Successfully."});
+    }
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+});
+
+
+                                                              /**
+                                                               * This route handles the requests rejected by Admin.
+                                                               */
+router.delete("/:approvalId", authenticateToken, isAdminAuth, async(req, res)=> {
+  try {
+    const rejectApproval = await Approval.deleteMany({_id : req.params.approvalId});
+    responseFormatter(res, null, {message : "Request rejected!"});
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+})
+
+
+
+
+module.exports = router;

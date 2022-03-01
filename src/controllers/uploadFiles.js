@@ -3,34 +3,25 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const Task = require('../models/task');
-const { authenticateToken, userRole, upload } = require('../config/util');
+const { authenticateToken, upload, responseFormatter, isEmployeeAuth } = require('../config/util');
 
-router.put("/:taskId/upload", authenticateToken, userRole("Employee"), upload.array("uploadFile"), async(req, res) => {
+router.put("/:taskId/upload", authenticateToken, isEmployeeAuth, upload.array("uploadFile"), async(req, res) => {
   try {
-    const findTask = await Task.findOne({_id : req.params.taskId});
-    if (!findTask) {
-      res.json({"status" : "Task not found!"});
-    } else {
-      req.files.forEach((file) => {
+    const taskData = await Task.findOne({_id : req.params.taskId});
+    req.files.forEach((file) => {
         findTask.uploadFile.push(file.path);
       });
       const updateTask = await findTask.save();
-      res.json({"status" : "Files uploaded successfully."});
-    }
+      responseFormatter(res, null, {message : "File uploaded successfully."});
   } catch (e) {
-    res.json(e.message);
+    responseFormatter(res, {message : e.message}, null);
   }
 });
 
 
-router.delete("/:taskId/remove", authenticateToken, userRole("Employee"), async(req, res) => {
+router.delete("/:taskId/remove", authenticateToken, isEmployeeAuth, async(req, res) => {
   try {
-    const findTask = await Task.findOne({_id : req.params.taskId});
-    if (!findTask) {
-      res.json({"status" : "Task not found!"});
-    } else {
-
-      const removeFiles = await Task.findOneAndUpdate(
+    const removeFiles = await Task.findOneAndUpdate(
         {_id : req.params.taskId},
         { $pullAll : {
           uploadFile: req.body.files
@@ -41,15 +32,13 @@ router.delete("/:taskId/remove", authenticateToken, userRole("Employee"), async(
       req.body.files.forEach((file) => {
         fs.unlink(file, (e) => {
           if (e) {
-            console.log(e);
-            return;
+            responseFormatter(res, {message : e.message}, null);
           }
         });
       });
-      res.json({"status" : "File deleted successfully."});
-    }
+      responseFormatter(res, null, {message : "File removed successfully."});
   } catch (e) {
-    res.json(e.message);
+      responseFormatter(res, {message : e.message}, null);
   }
 })
 

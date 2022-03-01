@@ -1,10 +1,12 @@
 
-const {secretToken} = require('../../constant.js');
+const {secretToken} = require('../config/constant.js');
+const {responseFormatter} = require('../config/util');
 const express = require('express');
 const router = express.Router();
 const Client = require('../models/client');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+
 
 router.post("/login", async(req, res) => {
    try {
@@ -19,16 +21,17 @@ router.post("/login", async(req, res) => {
             role : findUser.role
           };
            const accessToken = jwt.sign(user, secretToken);
-           res.json({accessToken: accessToken, name : findUser.name, role : findUser.role, username : findUser.username});
+           const data = {accessToken: accessToken, name : findUser.name, role : findUser.role, username : findUser.username};
+           responseFormatter(res, null, {data});
 
          } else {
-           res.json({"status" : "Incorrect password!"})
+           responseFormatter(res, {message: "Incorrect Password!"} , null);
          }
        } else {
-         res.json({"status" : "You are not registered!"})
+         responseFormatter(res, {message: "You are not registered!"} , null);
        }
    } catch (e) {
-     res.json({'status' : "Cannot log in."})
+     responseFormatter(res, {message : e.message}, null);
    }
 })
 
