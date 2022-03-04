@@ -9,9 +9,9 @@ router.put("/:taskId/upload", authenticateToken, isAuth, upload.array("uploadFil
   try {
     const taskData = await Task.findOne({_id : req.params.taskId});
     req.files.forEach((file) => {
-        findTask.uploadFile.push(file.path);
+        taskData.uploadFile.push(file.path);
       });
-      const updateTask = await findTask.save();
+      const updateTask = await taskData.save();
       responseFormatter(res, null, {message : "File uploaded successfully."});
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
