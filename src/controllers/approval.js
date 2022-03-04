@@ -42,7 +42,7 @@ router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, re
     const approvalData = await Approval.findOne({_id : req.params.approvalId});
     if (approvalData.approvalRequest === "updateClient") {
       const updatedClient = await Client.findOneAndUpdate(
-        {_id : approvalData.previousData._id},
+        {_id : approvalData.requestingForClient},
         approvalData.newData, {new : true}
       )
 

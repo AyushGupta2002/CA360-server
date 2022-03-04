@@ -76,9 +76,7 @@ router.put("/:clientId", authenticateToken, isAuth, async(req, res) => {
           approvalRequest : "updateClient",
           requestingUser : req.user._id,
           requestingForClient : req.params.clientId,
-          previousData: clientData,
           newData : req.body,
-
         });
         const createApprovalRequest = await newApprovalRequest.save();
         responseFormatter(res, null, {message : "Client get updated once Admin will approve."});
