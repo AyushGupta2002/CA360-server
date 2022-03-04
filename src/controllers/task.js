@@ -44,7 +44,7 @@ router.post("/", authenticateToken, isAuth, upload.array("uploadFile"), async(re
         createTask.uploadFile.push(`${file.path}`);
       });
       const newTask = await createTask.save();
-      responseFormatter(res, null, {data : newTask});
+      responseFormatter(res, null, {message : "New task created."});
     }
   } catch (e) {
      responseFormatter(res, {message : e.message}, null);
