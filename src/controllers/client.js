@@ -10,10 +10,10 @@ const { authenticateToken, giveUniqueId, responseFormatter, isAuth } = require("
 router.get("/", authenticateToken, isAuth, async(req, res) => {
   try {
     if (req.query.type) {
-      const clientData = await Client.find({gst: {$exists: true}}, ['_id', 'businessName', 'gst']);
+      const clientData = await Client.find({gst: {$exists: true}}, ['_id', 'dependent', 'businessName', 'uniqueId', 'contacts.primaryMobile', 'gst']);
       responseFormatter(res, null, {data : clientData});
     } else {
-      const clientsData = await Client.find({},['_id', 'dependent', 'businessName', 'uniqueId', 'contacts.primaryMobile']);
+      const clientsData = await Client.find({},['_id', 'dependent', 'businessName', 'uniqueId', 'contacts.primaryMobile', 'gst']);
       responseFormatter(res, null, {data : clientsData});
     }
   } catch (e) {
@@ -71,17 +71,21 @@ router.put("/:clientId", authenticateToken, isAuth, async(req, res) => {
         )
         responseFormatter(res, null, {message : "Client updated successfully."});
       } else {
+        const clientData = await Client.findOne({_id: req.params.clientId});
         const newApprovalRequest = new Approval({
           approvalRequest : "updateClient",
           requestingUser : req.user._id,
           requestingForClient : req.params.clientId,
-          data : req.body
+          previousData: clientData,
+          newData : req.body,
+
         });
         const createApprovalRequest = await newApprovalRequest.save();
         responseFormatter(res, null, {message : "Client get updated once Admin will approve."});
       }
     }
   } catch (e) {
+    console.log(e);
     responseFormatter(res, {message : e.message}, null);
   }
 })

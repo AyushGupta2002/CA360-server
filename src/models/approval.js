@@ -19,7 +19,11 @@ const approvalSchema = new mongoose.Schema({
     type : mongoose.SchemaTypes.ObjectId,
     ref: "user"
   },
-  data : {
+  previousData: {
+    type : Object,
+    required : true
+  },
+  newData : {
     type : Object,
     required : true
   }
