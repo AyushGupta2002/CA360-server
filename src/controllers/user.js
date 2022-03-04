@@ -66,6 +66,13 @@ router.post("/",authenticateToken, isAdminAuth, async(req, res) => {
                           */
 router.put("/:userId", authenticateToken, isSameUser, async(req, res) => {
     try{
+      if (req.user.role === 'Admin') {
+        const updatedUser = await User.findOneAndUpdate(
+          {_id : req.params.userId},
+           req.body, {new : true}
+        )
+        responseFormatter(res, null, {message : "User updated Successfully."});
+      } else {
         const newApprovalRequest = new Approval({
           approvalRequest : "updateUser",
           requestingUser : req.user._id,
@@ -74,6 +81,7 @@ router.put("/:userId", authenticateToken, isSameUser, async(req, res) => {
         });
         const createApprovalRequest = await newApprovalRequest.save();
         responseFormatter(res, null, {message : "User get updated once Admin will approve."});
+      }
     } catch (e) {
       responseFormatter(res, {message : e.message}, null);
     }

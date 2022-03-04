@@ -34,26 +34,6 @@ router.get("/:approvalId", authenticateToken, isAdminAuth, async(req, res) => {
   }
 });
 
-
-                                                                   /**
-                                                                    * This route will create a client once approved by Admin.
-                                                                    */
-router.post("/create/:approvalId", authenticateToken, isAdminAuth, async(req, res) => {
-  try {
-    const approvalData = await Approval.findOne({_id : req.params.approvalId});
-    const clientData = await Client.find({});
-    const uniqueId = giveUniqueId(clientData);
-    const createClient = new Client(approvalData.data);
-    createClient.uniqueId = uniqueId;
-    const newClient = await createClient.save();
-    const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
-    responseFormatter(res, null, {message : "Client created successfully."});
-  } catch (e) {
-    responseFormatter(res, {message : e.message}, null);
-  }
-});
-
-
                                                                    /**
                                                                     * this route will update the client's or user's data once approved by Admin.
                                                                     */

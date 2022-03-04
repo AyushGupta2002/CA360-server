@@ -9,8 +9,13 @@ const { authenticateToken, giveUniqueId, responseFormatter, isAuth } = require("
                  */
 router.get("/", authenticateToken, isAuth, async(req, res) => {
   try {
-    const clientsData = await Client.find({},['_id', 'dependent', 'businessName', 'uniqueId', 'contacts.primaryMobile']);
-    responseFormatter(res, null, {data : clientsData});
+    if (req.query.type) {
+      const clientData = await Client.find({gst: {$exists: true}}, ['_id', 'businessName', 'gst']);
+      responseFormatter(res, null, {data : clientData});
+    } else {
+      const clientsData = await Client.find({},['_id', 'dependent', 'businessName', 'uniqueId', 'contacts.primaryMobile']);
+      responseFormatter(res, null, {data : clientsData});
+    }
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
   }
@@ -21,8 +26,8 @@ router.get("/", authenticateToken, isAuth, async(req, res) => {
                           */
 router.get("/:clientId", authenticateToken, isAuth, async(req, res) => {
   try {
-    const clientData = await Client.findOne({_id : req.params.clientId});
-    responseFormatter(res, null, {data : clientData});
+      const clientData = await Client.findOne({_id : req.params.clientId});
+      responseFormatter(res, null, {data : clientData});
   } catch(e) {
     responseFormatter(res, {message : e.message}, null);
   }
@@ -37,22 +42,12 @@ router.post("/", authenticateToken, isAuth, async(req, res) => {
        if (clientData) {
          responseFormatter(res, {message : "Business name already exists!"}, null);
        } else {
-         if (req.user.role === "Admin") {
-           const clientData = await Client.find({});
-           const uniqueId = giveUniqueId(clientData);
-           const createClient = new Client(req.body);
-           createClient.uniqueId = uniqueId;
-           const newClient = await createClient.save();
-           responseFormatter(res, null, {message : "Client created successfully."});
-         } else {
-           const newApprovalRequest = new Approval({
-             approvalRequest : "createClient",
-             requestingUser : req.user._id,
-             data : req.body
-           });
-           const createApprovalRequest = await newApprovalRequest.save();
-           responseFormatter(res, null, {message : "Client gets created once admin approves."});
-         }
+         const clientData = await Client.find({});
+         const uniqueId = giveUniqueId(clientData);
+         const createClient = new Client(req.body);
+         createClient.uniqueId = uniqueId;
+         const newClient = await createClient.save();
+         responseFormatter(res, null, {message : "Client created successfully."});
        }
   } catch (e) {
       responseFormatter(res, {message : e.message}, null);
