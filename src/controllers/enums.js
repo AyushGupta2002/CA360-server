@@ -2,9 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const { enums } = require('../config/constant.js');
-const { authenticateToken, isEmployeeAuth, responseFormatter } = require("../config/util");
+const { authenticateToken, isAuth, responseFormatter } = require("../config/util");
 
-router.get("/", authenticateToken, isEmployeeAuth, (req, res) => {
+router.get("/", authenticateToken, isAuth, (req, res) => {
   responseFormatter(res, null, {data : enums});
 });
 

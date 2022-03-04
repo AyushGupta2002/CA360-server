@@ -3,12 +3,12 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const Approval = require("../models/approval");
-const { authenticateToken, giveUniqueId, isSameUser, responseFormatter, isEmployeeAuth, isAdminAuth } = require("../config/util");
+const { authenticateToken, giveUniqueId, isSameUser, responseFormatter, isAuth, isAdminAuth } = require("../config/util");
 
                 /**
                  * This route will give information of all the users.
                  */
-router.get("/", authenticateToken, isEmployeeAuth, async(req, res) => {
+router.get("/", authenticateToken, isAuth, async(req, res) => {
   try{
     const usersData = await User.find({}, ['_id', 'username', 'name', 'role', 'uniqueId']);
     responseFormatter(res, null, {data : usersData});
@@ -21,7 +21,7 @@ router.get("/", authenticateToken, isEmployeeAuth, async(req, res) => {
                       /**
                        * This route will give the information of a particular user.
                        */
-router.get("/:userId", authenticateToken, isEmployeeAuth, async(req, res) => {
+router.get("/:userId", authenticateToken, isAuth, async(req, res) => {
   try {
     const userData = await User.findOne({_id : req.params.userId},['_id','name','username','role']);
     responseFormatter(res, null, {data : userData});
@@ -69,6 +69,7 @@ router.put("/:userId", authenticateToken, isSameUser, async(req, res) => {
         const newApprovalRequest = new Approval({
           approvalRequest : "updateUser",
           requestingUser : req.user._id,
+          requestingForUser : req.params.userId,
           data : req.body
         });
         const createApprovalRequest = await newApprovalRequest.save();

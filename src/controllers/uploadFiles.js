@@ -3,9 +3,9 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const Task = require('../models/task');
-const { authenticateToken, upload, responseFormatter, isEmployeeAuth } = require('../config/util');
+const { authenticateToken, upload, responseFormatter, isAuth } = require('../config/util');
 
-router.put("/:taskId/upload", authenticateToken, isEmployeeAuth, upload.array("uploadFile"), async(req, res) => {
+router.put("/:taskId/upload", authenticateToken, isAuth, upload.array("uploadFile"), async(req, res) => {
   try {
     const taskData = await Task.findOne({_id : req.params.taskId});
     req.files.forEach((file) => {
@@ -19,7 +19,7 @@ router.put("/:taskId/upload", authenticateToken, isEmployeeAuth, upload.array("u
 });
 
 
-router.delete("/:taskId/remove", authenticateToken, isEmployeeAuth, async(req, res) => {
+router.delete("/:taskId/remove", authenticateToken, isAuth, async(req, res) => {
   try {
     const removeFiles = await Task.findOneAndUpdate(
         {_id : req.params.taskId},

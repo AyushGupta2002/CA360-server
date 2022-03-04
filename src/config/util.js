@@ -28,7 +28,7 @@ function authenticateToken(req, res, next) {
  *
  * @return {function} Middleware
  */
-function isEmployeeAuth(req, res, next) {
+function isAuth(req, res, next) {
   if (req.user.role === 'Employee' || req.user.role === 'Admin') {
     next();
   }
@@ -138,4 +138,12 @@ const responseFormatter = (res, error, data) => {
 };
 
 
-module.exports = { authenticateToken, isSameUser, giveUniqueId, upload, responseFormatter, isAdminAuth, isEmployeeAuth };
+module.exports = {
+   authenticateToken,
+   isSameUser,
+   giveUniqueId,
+   upload,
+   responseFormatter,
+   isAdminAuth,
+   isAuth
+ };

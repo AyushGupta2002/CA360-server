@@ -70,7 +70,7 @@ router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, re
     }
     else {
       const updatedUser = await User.findOneAndUpdate(
-        {_id : approvalData.updatingUser},
+        {_id : approvalData.requestingForUser},
         approvalData.data, {new : true}
       )
       const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});

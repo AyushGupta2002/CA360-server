@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.json());
-app.use('/public/uploads/', express.static("public/uploads"));
+app.use('/uploads/', express.static("public/uploads"));
 
 mongoose.connect(mongoURL, {
   useNewUrlParser: true

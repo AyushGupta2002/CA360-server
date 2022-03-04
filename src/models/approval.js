@@ -15,6 +15,10 @@ const approvalSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     ref: "client"
   },
+  requestingForUser : {
+    type : mongoose.SchemaTypes.ObjectId,
+    ref: "user"
+  },
   data : {
     type : Object,
     required : true

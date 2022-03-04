@@ -2,12 +2,12 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
-const { authenticateToken, upload, responseFormatter, isEmployeeAuth, isAdminAuth } = require("../config/util");
+const { authenticateToken, upload, responseFormatter, isAuth, isAdminAuth } = require("../config/util");
 const fs = require('fs');
                 /**
                  * This route will give all the tasks.
                  */
-router.get("/", authenticateToken, isEmployeeAuth, async(req, res) => {
+router.get("/", authenticateToken, isAuth, async(req, res) => {
   try {
     const tasksData = await Task.find();
     responseFormatter(res, null, {data : tasksData});
@@ -20,7 +20,7 @@ router.get("/", authenticateToken, isEmployeeAuth, async(req, res) => {
                        /**
                         * This route will give a single task details.
                         */
-router.get("/:taskId", authenticateToken, isEmployeeAuth, async(req, res) => {
+router.get("/:taskId", authenticateToken, isAuth, async(req, res) => {
   try {
     const taskData = await Task.findOne({_id : req.params.taskId});
     responseFormatter(res, null, {data : taskData});
@@ -33,7 +33,7 @@ router.get("/:taskId", authenticateToken, isEmployeeAuth, async(req, res) => {
                  /**
                   * This route will create a new task.
                   */
-router.post("/", authenticateToken, isEmployeeAuth, upload.array("uploadFile"), async(req, res) => {
+router.post("/", authenticateToken, isAuth, upload.array("uploadFile"), async(req, res) => {
   try {
     const taskData = await Task.findOne({taskName : req.body.taskName});
     if (taskData) {
@@ -55,7 +55,7 @@ router.post("/", authenticateToken, isEmployeeAuth, upload.array("uploadFile"), 
                          /**
                           * This route will update the task.
                           */
-router.put("/:taskId", authenticateToken, isEmployeeAuth, async(req, res) => {
+router.put("/:taskId", authenticateToken, isAuth, async(req, res) => {
   try {
     const updatedClientTask = await Task.findOneAndUpdate(
       {_id : req.params.taskId},
