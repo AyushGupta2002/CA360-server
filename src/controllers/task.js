@@ -62,7 +62,7 @@ router.put("/:taskId", authenticateToken, isAuth, async(req, res) => {
       req.body,
       {new : true}
     );
-    responseFormatter(res, null, {data : updatedTask});
+    responseFormatter(res, null, {message : "Task updated Successfully."});
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
   }
