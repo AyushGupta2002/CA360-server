@@ -12,6 +12,9 @@
   },
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "16.13.0"
+  },
   "bugs": {
     "url": "https://gitlab.com/sudoboat/accountant-clients-tracking/issues"
   },
