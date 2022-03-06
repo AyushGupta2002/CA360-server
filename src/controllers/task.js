@@ -76,14 +76,19 @@ router.delete("/:taskId", authenticateToken, isAdminAuth, async(req, res) => {
   try {
     const taskData = await Task.findOne({_id : req.params.taskId});
     const removeTask = await Task.deleteMany({_id : req.params.taskId});
+    var check = true;
       taskData.uploadFile.forEach((file) => {
-        fs.unlink(file, (e) => {
+        fs.unlink("public/" + file, (e) => {
           if (e) {
-            responseFormatter(res, {message : e.message}, null);
+            check = false;
           }
         });
       });
-      responseFormatter(res, null, {message : "Task removed successfully."});
+      if (!check) {
+        responseFormatter(res, {message: "File not found!"}, null);
+      } else {
+        responseFormatter(res, null, {message : "Task removed successfully."});
+      }
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
   }

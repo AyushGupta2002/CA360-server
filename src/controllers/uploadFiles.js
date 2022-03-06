@@ -9,7 +9,7 @@ router.put("/:taskId/upload", authenticateToken, isAuth, upload.array("uploadFil
   try {
     const taskData = await Task.findOne({_id : req.params.taskId});
     req.files.forEach((file) => {
-        taskData.uploadFile.push(file.path);
+        taskData.uploadFile.push("/uploads/"+file.filename);
       });
       const updateTask = await taskData.save();
       responseFormatter(res, null, {message : "File uploaded successfully."});
@@ -29,14 +29,14 @@ router.delete("/:taskId/remove", authenticateToken, isAuth, async(req, res) => {
       },
         {new : true}
       );
-      req.body.files.forEach((file) => {
-        fs.unlink(file, (e) => {
+      fs.unlink("public/" + req.body.files[0], (e) => {
           if (e) {
-            responseFormatter(res, {message : e.message}, null);
+            responseFormatter(res, {message : "File not exist!"}, null);
+          } else {
+            responseFormatter(res, null, {message : "File removed successfully."});
           }
-        });
       });
-      responseFormatter(res, null, {message : "File removed successfully."});
+
   } catch (e) {
       responseFormatter(res, {message : e.message}, null);
   }
