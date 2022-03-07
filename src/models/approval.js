@@ -7,9 +7,7 @@ const approvalSchema = new mongoose.Schema({
     required : true
   },
   requestingUser : {
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: "user",
-    required: true
+    type : Object
   },
   requestingForClient : {
     type: mongoose.SchemaTypes.ObjectId,
@@ -18,6 +16,10 @@ const approvalSchema = new mongoose.Schema({
   requestingForUser : {
     type : mongoose.SchemaTypes.ObjectId,
     ref: "user"
+  },
+  status: {
+    type : String,
+    required : true
   },
   newData : {
     type : Object,

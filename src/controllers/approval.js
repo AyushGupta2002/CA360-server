@@ -45,8 +45,8 @@ router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, re
         {_id : approvalData.requestingForClient},
         approvalData.newData, {new : true}
       )
-
-      const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
+      approvalData.status = "Approved";
+      const approvedRequest = await approvalData.save();
       responseFormatter(res, null, {message : "Client updated Successfully."});
     }
     else {
@@ -71,7 +71,8 @@ router.delete("/delete/:approvalId",  authenticateToken, isAdminAuth, async(req,
     const approvalData = await Approval.findOne({_id : req.params.approvalId});
     if (approvalData.approvalRequest === "deleteClient") {
       const deletedClient = await Client.deleteMany({_id : approvalData.requestingForClient});
-      const removeRequest = await Approval.deleteMany({_id : req.params.approvalId});
+      approvalData.status = "Approved";
+      const approvedRequest = await approvalData.save();
       responseFormatter(res, null, {message : "Client deleted Successfully."});
     }
   } catch (e) {
@@ -85,7 +86,9 @@ router.delete("/delete/:approvalId",  authenticateToken, isAdminAuth, async(req,
                                                                */
 router.delete("/:approvalId", authenticateToken, isAdminAuth, async(req, res)=> {
   try {
-    const rejectApproval = await Approval.deleteMany({_id : req.params.approvalId});
+    const approvalData = await Approval.findOne({_id : req.params.approvalId});
+    approvalData.status = "Rejected";
+    const approvedRequest = await approvalData.save();
     responseFormatter(res, null, {message : "Request rejected!"});
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);

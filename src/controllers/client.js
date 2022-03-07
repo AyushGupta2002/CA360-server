@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Client = require("../models/client");
 const Approval = require("../models/approval");
+const User = require("../models/user");
 const { authenticateToken, giveUniqueId, responseFormatter, isAuth } = require("../config/util");
 
                 /**
@@ -71,12 +72,13 @@ router.put("/:clientId", authenticateToken, isAuth, async(req, res) => {
         )
         responseFormatter(res, null, {message : "Client updated successfully."});
       } else {
-        const clientData = await Client.findOne({_id: req.params.clientId});
+        const userData = await User.findOne({_id: req.user._id}, ['_id', 'name', 'uniqueId']);
         const newApprovalRequest = new Approval({
           approvalRequest : "updateClient",
-          requestingUser : req.user._id,
+          requestingUser : userData,
           requestingForClient : req.params.clientId,
           newData : req.body,
+          status: "open"
         });
         const createApprovalRequest = await newApprovalRequest.save();
         responseFormatter(res, null, {message : "Client get updated once Admin will approve."});
@@ -98,11 +100,13 @@ router.delete("/:clientId", authenticateToken, isAuth, async(req, res) => {
       const deleteClient = await Client.deleteMany({_id : req.params.clientId});
       responseFormatter(res, null, {message : "Client removed successfully."});
     } else {
+      const userData = await User.findOne({_id: req.user._id}, ['_id', 'name', 'uniqueId']);
       const newApprovalRequest = new Approval({
         approvalRequest : "deleteClient",
-        requestingUser : req.user._id,
+        requestingUser : userData,
         requestingForClient : req.params.clientId,
-        data : clientData
+        data : clientData,
+        status : "open"
       });
       const createApprovalRequest = await newApprovalRequest.save();
       responseFormatter(res, null, {message : "Client get removed once admin approves."});
