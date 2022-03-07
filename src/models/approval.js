@@ -21,7 +21,7 @@ const approvalSchema = new mongoose.Schema({
     type : String,
     required : true
   },
-  newData : {
+  data : {
     type : Object,
     required : true
   }
