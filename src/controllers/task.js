@@ -41,7 +41,7 @@ router.post("/", authenticateToken, isAuth, upload.array("uploadFile"), async(re
     } else {
       const createTask = new Task(req.body);
       req.files.forEach((file) => {
-        createTask.uploadFile.push(`${file.path}`);
+        createTask.uploadFile.push("/uploads/"+file.filename);
       });
       const newTask = await createTask.save();
       responseFormatter(res, null, {message : "New task created."});
