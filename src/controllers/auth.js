@@ -23,10 +23,10 @@ router.post("/login", async(req, res) => {
            const accessToken = jwt.sign(user, secretToken);
            const data = {
               accessToken: accessToken,
+              _id : findUser._id,
               name : findUser.name,
               role : findUser.role,
-              username : findUser.username,
-              uniqueId : findUser.uniqueId
+              username : findUser.username
             };
            responseFormatter(res, null, {data});
 
