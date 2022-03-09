@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 
 router.post("/login", async(req, res) => {
    try {
-     const findUser = await User.findOne({username : req.body.username})
+     const findUser = await User.findOne({username : req.body.username});
        if (findUser) {
          if (findUser.password === req.body.password) {
 
@@ -21,7 +21,13 @@ router.post("/login", async(req, res) => {
             role : findUser.role
           };
            const accessToken = jwt.sign(user, secretToken);
-           const data = {accessToken: accessToken, name : findUser.name, role : findUser.role, username : findUser.username};
+           const data = {
+              accessToken: accessToken,
+              name : findUser.name,
+              role : findUser.role,
+              username : findUser.username,
+              uniqueId : findUser.uniqueId
+            };
            responseFormatter(res, null, {data});
 
          } else {
