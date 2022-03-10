@@ -23,7 +23,7 @@ router.get("/", authenticateToken, isAuth, async(req, res) => {
                        */
 router.get("/:userId", authenticateToken, isAuth, async(req, res) => {
   try {
-    const userData = await User.findOne({_id : req.params.userId},['_id','name','username','role']);
+    const userData = await User.findOne({_id : req.params.userId},['_id','name','username','role', 'uniqueId']);
     responseFormatter(res, null, {data : userData});
   } catch(e) {
     responseFormatter(res, {message : e.message}, null);
