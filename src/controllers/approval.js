@@ -14,7 +14,7 @@ const { authenticateToken, isAdminAuth, responseFormatter, giveUniqueId} = requi
                                                  */
 router.get("/", authenticateToken, isAdminAuth, async(req, res) => {
   try {
-    const apporvalData = await Approval.find();
+    const apporvalData = await Approval.find({status : "open"});
     responseFormatter(res, null, {data : apporvalData});
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
@@ -43,7 +43,7 @@ router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, re
     if (approvalData.approvalRequest === "updateClient") {
       const updatedClient = await Client.findOneAndUpdate(
         {_id : approvalData.requestingForClient},
-        approvalData.newData, {new : true}
+        approvalData.data, {new : true}
       )
       approvalData.status = "Approved";
       const approvedRequest = await approvalData.save();
