@@ -47,6 +47,25 @@ router.post("/", authenticateToken, isAdminAuth, async(req, res) => {
   }
 });
 
+
+
+                                                       /**
+                                                        * This route will update the user role.
+                                                        */
+router.put("/:roleId", authenticateToken, isAdminAuth, async(req, res) => {
+  try {
+    const updatedClientTask = await Role.findOneAndUpdate(
+      {_id : req.params.roleId},
+      req.body,
+      {new : true}
+    );
+    responseFormatter(res, null, {message : "Role updated Successfully."});
+  } catch (e) {
+    responseFormatter(res, {message : e.message}, null);
+  }
+});
+
+
                                                             /**
                                                             * This route will delete a role.
                                                             */
