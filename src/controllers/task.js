@@ -10,7 +10,17 @@ const fs = require('fs');
 router.get("/", authenticateToken, isAuth, async(req, res) => {
   try {
     const tasksData = await Task.find();
-    responseFormatter(res, null, {data : tasksData});
+    let responseTaskData = [];
+    tasksData.forEach(task => {
+      responseTaskData.push({
+        _id : task._id,
+        taskName : task.taskName,
+        assignedTo : task.assignedTo,
+        status : task.status,
+        createdDate : task.createdDate
+      });
+    });
+    responseFormatter(res, null, {data : responseTaskData});
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
   }
@@ -23,7 +33,14 @@ router.get("/", authenticateToken, isAuth, async(req, res) => {
 router.get("/:taskId", authenticateToken, isAuth, async(req, res) => {
   try {
     const taskData = await Task.findOne({_id : req.params.taskId});
-    responseFormatter(res, null, {data : taskData});
+    let responseTaskData = {
+        _id : taskData._id,
+        taskName : taskData.taskName,
+        assignedTo : taskData.assignedTo,
+        status : taskData.status,
+        createdDate : taskData.createdDate
+    }
+    responseFormatter(res, null, {data : responseTaskData});
   } catch (e) {
     responseFormatter(res, {message : e.message}, null);
   }
@@ -39,7 +56,12 @@ router.post("/", authenticateToken, isAuth, upload.array("uploadFile"), async(re
     if (taskData) {
       responseFormatter(res, {message : "Task name already exists!"}, null);
     } else {
-      const createTask = new Task(req.body);
+      const newTaskObject = {
+        assignedTo : req.body.assignedTo,
+        taskName : req.body.taskName,
+        createdDate : `${Date.now()}`
+      }
+      const createTask = new Task(newTaskObject);
       req.files.forEach((file) => {
         createTask.uploadFile.push("/uploads/"+file.filename);
       });

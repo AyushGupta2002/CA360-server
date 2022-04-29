@@ -48,7 +48,7 @@ router.post("/", authenticateToken, isAuth, async(req, res) => {
          const createClient = new Client(req.body);
          createClient.uniqueId = uniqueId;
          const newClient = await createClient.save();
-         responseFormatter(res, null, {message : "Client created successfully."});
+         responseFormatter(res, null, {data : {clientId : createClient._id}});
        }
   } catch (e) {
       responseFormatter(res, {message : e.message}, null);

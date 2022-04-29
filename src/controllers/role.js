@@ -48,9 +48,8 @@ router.post("/", authenticateToken, isAdminAuth, async(req, res) => {
 });
 
 
-
                                                        /**
-                                                        * This route will update the user role.
+                                                        * this route will update role.
                                                         */
 router.put("/:roleId", authenticateToken, isAdminAuth, async(req, res) => {
   try {
@@ -64,6 +63,9 @@ router.put("/:roleId", authenticateToken, isAdminAuth, async(req, res) => {
     responseFormatter(res, {message : e.message}, null);
   }
 });
+
+
+
 
 
                                                             /**

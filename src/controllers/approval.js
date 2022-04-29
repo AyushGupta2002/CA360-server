@@ -5,14 +5,14 @@ const mongoose = require('mongoose');
 const Approval = require('../models/approval');
 const Client = require('../models/client');
 const User = require('../models/user');
-const { authenticateToken, isAdminAuth, responseFormatter, giveUniqueId} = require('../config/util');
+const { authenticateToken, isAuth, responseFormatter, giveUniqueId} = require('../config/util');
 
 
                                                 /**
                                                  * This route will give the list of all approval requests.
                                                  *
                                                  */
-router.get("/", authenticateToken, isAdminAuth, async(req, res) => {
+router.get("/", authenticateToken, isAuth, async(req, res) => {
   try {
     const apporvalData = await Approval.find({status : "open"});
     responseFormatter(res, null, {data : apporvalData});
@@ -25,7 +25,7 @@ router.get("/", authenticateToken, isAdminAuth, async(req, res) => {
                                                            /**
                                                             * This route will give the data of a particular request.
                                                             */
-router.get("/:approvalId", authenticateToken, isAdminAuth, async(req, res) => {
+router.get("/:approvalId", authenticateToken, isAuth, async(req, res) => {
   try {
     const apporvalData = await Approval.findOne({_id : req.params.approvalId});
     responseFormatter(res, null, {data : apporvalData});
@@ -37,7 +37,7 @@ router.get("/:approvalId", authenticateToken, isAdminAuth, async(req, res) => {
                                                                    /**
                                                                     * this route will update the client's or user's data once approved by Admin.
                                                                     */
-router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, res) => {
+router.put("/update/:approvalId",  authenticateToken, isAuth, async(req, res) => {
   try {
     const approvalData = await Approval.findOne({_id : req.params.approvalId});
     if (approvalData.approvalRequest === "updateClient") {
@@ -66,7 +66,7 @@ router.put("/update/:approvalId",  authenticateToken, isAdminAuth, async(req, re
                                                                       /**
                                                                        * this route will delete a client once approved by Admin.
                                                                        */
-router.delete("/delete/:approvalId",  authenticateToken, isAdminAuth, async(req, res) => {
+router.delete("/delete/:approvalId",  authenticateToken, isAuth, async(req, res) => {
   try {
     const approvalData = await Approval.findOne({_id : req.params.approvalId});
     if (approvalData.approvalRequest === "deleteClient") {
@@ -84,7 +84,7 @@ router.delete("/delete/:approvalId",  authenticateToken, isAdminAuth, async(req,
                                                               /**
                                                                * This route handles the requests rejected by Admin.
                                                                */
-router.delete("/:approvalId", authenticateToken, isAdminAuth, async(req, res)=> {
+router.delete("/:approvalId", authenticateToken, isAuth, async(req, res)=> {
   try {
     const approvalData = await Approval.findOne({_id : req.params.approvalId});
     approvalData.status = "Rejected";

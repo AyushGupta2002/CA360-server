@@ -50,8 +50,15 @@ router.post("/",authenticateToken, isAdminAuth, async(req, res) => {
         const createUser = new User(req.body);
         if (createUser){
           createUser.uniqueId = uniqueId;
-          const newUser = await createUser.save()
-          responseFormatter(res, null, {data : newUser});
+          const newUser = await createUser.save();
+          const responseUserData = {
+            _id : newUser._id,
+            name : newUser.name,
+            username : newUser.username,
+            role : newUser.role,
+            uniqueId : newUser.uniqueId
+          }
+          responseFormatter(res, null, {data : responseUserData});
         }
       }
     }

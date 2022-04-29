@@ -19,6 +19,9 @@ const taskSchema = new mongoose.Schema({
     type : String,
     default : "open"
   },
+  createdDate : {
+    type : String
+  },
   uploadFile : {
     type : []
   }

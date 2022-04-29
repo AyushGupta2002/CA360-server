@@ -5,10 +5,10 @@ const enums = {
   filingType: ['Monthly', 'Quarterly'],
   verificationCode: ['DSC', 'EVC'],
   paymentMode: ['e-pay (office)', 'e-pay (client)', 'neft/rtgs', 'others'],
-  entityType: ['individual', 'firm', 'company', 'LLP', 'HUF', 'AOP', 'BOI', 'Trust'],
+  entityType: ['Individual', 'Firm', 'Company', 'LLP', 'HUF', 'AOP', 'BOI', 'Trust'],
   natureOfBusiness: ['Salaried Employee', 'Manufacturing', 'Service', 'Trading'],
   role: ['Admin', 'Employee'],
-  registeredState: ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli", "Daman and Diu", 
+  registeredState: ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli", "Daman and Diu",
   "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
    "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"]
 }
