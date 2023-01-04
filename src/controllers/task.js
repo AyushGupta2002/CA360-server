@@ -56,10 +56,11 @@ router.post("/", authenticateToken, isAuth, upload.array("uploadFile"), async(re
     if (taskData) {
       responseFormatter(res, {message : "Task name already exists!"}, null);
     } else {
+      const d = new Date();
       const newTaskObject = {
         assignedTo : req.body.assignedTo,
         taskName : req.body.taskName,
-        createdDate : `${Date.now()}`
+        createdDate : d
       }
       const createTask = new Task(newTaskObject);
       req.files.forEach((file) => {
